@@ -10,9 +10,12 @@ namespace BusinessLayer.Services
     {
         private readonly IUserRepository _userRepository;
 
-        public UserService(IUserRepository userRepository)
+        private readonly ITokenService _tokenService;
+
+        public UserService(IUserRepository userRepository,ITokenService tokenService)
         {
             _userRepository = userRepository;
+            _tokenService = tokenService;
         }
 
         public bool Register(RegisterDTO registerDTO)
@@ -40,6 +43,29 @@ namespace BusinessLayer.Services
             user.ChangedAt = DateTime.UtcNow;
 
             return _userRepository.Register(user);
+        }
+        public string Login(LoginDTO loginDTO)
+        {
+            var user =
+                _userRepository.GetUserByEmail(
+                    loginDTO.Email);
+
+            if (user == null)
+            {
+                return null;
+            }
+
+            bool passwordMatch =
+                BCrypt.Net.BCrypt.Verify(
+                    loginDTO.Password,
+                    user.Password);
+
+            if (!passwordMatch)
+            {
+                return null;
+            }
+
+            return _tokenService.GenerateToken(user);
         }
     }
 }

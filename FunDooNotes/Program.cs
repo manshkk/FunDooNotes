@@ -1,9 +1,13 @@
 using BusinessLayer.Interfaces;
 using BusinessLayer.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using RepositoryLayer.Context;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
+using System.Text;
 
 namespace FunDooNotes
 {
@@ -11,15 +15,88 @@ namespace FunDooNotes
     {
         public static void Main(string[] args)
         {
-            var builder =
-                WebApplication.CreateBuilder(args);
+            var builder = WebApplication.CreateBuilder(args);
 
+            // Add Controllers
             builder.Services.AddControllers();
+
+            // JWT Authentication
+            builder.Services.AddAuthentication(
+                JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters =
+                        new TokenValidationParameters
+                        {
+                            ValidateIssuer = true,
+                            ValidateAudience = true,
+                            ValidateLifetime = true,
+                            ValidateIssuerSigningKey = true,
+
+                            ValidIssuer =
+                                builder.Configuration["Jwt:Issuer"],
+
+                            ValidAudience =
+                                builder.Configuration["Jwt:Audience"],
+
+                            IssuerSigningKey =
+                                new SymmetricSecurityKey(
+                                    Encoding.UTF8.GetBytes(
+                                        builder.Configuration["Jwt:Key"]))
+                        };
+
+                    // JWT Error Logging
+                    options.Events = new JwtBearerEvents
+                    {
+                        OnAuthenticationFailed = context =>
+                        {
+                            Console.WriteLine(
+                                "JWT Error: " +
+                                context.Exception.Message);
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
 
             builder.Services.AddEndpointsApiExplorer();
 
-            builder.Services.AddSwaggerGen();
+            // Swagger JWT Configuration
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.AddSecurityDefinition(
+                    "Bearer",
+                    new OpenApiSecurityScheme
+                    {
+                        Name = "Authorization",
+                        Type = SecuritySchemeType.Http,
+                        Scheme = "bearer",
+                        BearerFormat = "JWT",
+                        In = ParameterLocation.Header,
+                        Description =
+                            "Enter JWT Token Only"
+                    });
 
+                options.AddSecurityRequirement(
+                    new OpenApiSecurityRequirement
+                    {
+                        {
+                            new OpenApiSecurityScheme
+                            {
+                                Reference =
+                                    new OpenApiReference
+                                    {
+                                        Type =
+                                            ReferenceType.SecurityScheme,
+                                        Id = "Bearer"
+                                    }
+                            },
+                            Array.Empty<string>()
+                        }
+                    });
+            });
+
+            // Database Context
             builder.Services.AddDbContext<FundooContext>(
                 options =>
                 {
@@ -27,6 +104,8 @@ namespace FunDooNotes
                         builder.Configuration.GetConnectionString(
                             "DefaultConnection"));
                 });
+
+            // Dependency Injection
 
             builder.Services.AddScoped<
                 IUserService,
@@ -36,14 +115,22 @@ namespace FunDooNotes
                 IUserRepository,
                 UserRepository>();
 
+            builder.Services.AddScoped<
+                ITokenService,
+                TokenService>();
+
             var app = builder.Build();
 
+            // Swagger
             app.UseSwagger();
-
             app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
 
+            // Authentication First
+            app.UseAuthentication();
+
+            // Authorization Second
             app.UseAuthorization();
 
             app.MapControllers();
