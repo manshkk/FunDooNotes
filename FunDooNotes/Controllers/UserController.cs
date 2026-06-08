@@ -10,10 +10,14 @@ namespace FunDooNotes.Controllers
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
+        private readonly IEmailService _emailService;
 
-        public UserController(IUserService userService)
+        public UserController(
+        IUserService userService,
+        IEmailService emailService)
         {
             _userService = userService;
+            _emailService = emailService;
         }
 
         [HttpPost("register")]
@@ -87,6 +91,35 @@ namespace FunDooNotes.Controllers
             return Ok(new
             {
                 Message = "Authenticated User Access Granted"
+            });
+        }
+        [HttpGet("test-email")]
+        public IActionResult TestEmail()
+        {
+            _emailService.SendEmail(
+                new EmailDTO
+                {
+                    ToEmail = "manishdn2003@gmail.com",
+                    Subject = "Fundoo Notes SMTP Test",
+                    Body =
+                    "<h2>SMTP Working Successfully</h2>" +
+                    "<p>This is a test email from Fundoo Notes.</p>"
+                });
+
+            _emailService.SendEmail(
+                new EmailDTO
+                {
+                    ToEmail = "manishkaushal0334@gmail.com",
+                    Subject = "Fundoo Notes SMTP Test",
+                    Body =
+                    "<h2>SMTP Working Successfully</h2>" +
+                    "<p>This is a test email from Fundoo Notes.</p>"
+                });
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Emails Sent Successfully"
             });
         }
     }

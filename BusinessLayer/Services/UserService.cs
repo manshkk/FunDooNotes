@@ -12,10 +12,13 @@ namespace BusinessLayer.Services
 
         private readonly ITokenService _tokenService;
 
-        public UserService(IUserRepository userRepository,ITokenService tokenService)
+        private readonly IEmailService _emailService;
+
+        public UserService(IUserRepository userRepository,ITokenService tokenService, IEmailService emailService)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
+            _emailService = emailService;
         }
 
         public bool Register(RegisterDTO registerDTO)
@@ -63,6 +66,54 @@ namespace BusinessLayer.Services
             if (!passwordMatch)
             {
                 return null;
+            }
+
+            try
+            {
+                _emailService.SendEmail(
+                    new EmailDTO
+                    {
+                        ToEmail = user.Email,
+
+                        Subject = "Welcome Back to Fundoo Notes",
+
+                        Body =
+                        $@"
+                        <div style='font-family:Arial,sans-serif;padding:20px'>
+                            <h2 style='color:#4CAF50'>
+                                Welcome Back, {user.FirstName}!
+                            </h2>
+
+                            <p>
+                                We noticed a successful login to your Fundoo Notes account.
+                            </p>
+
+                            <p>
+                                <strong>Login Time:</strong> {DateTime.Now}
+                            </p>
+
+                            <p>
+                                We're glad to see you again. Your notes and important information are ready for you.
+                            </p>
+
+                            <p>
+                                If this login was not performed by you, please change your password immediately.
+                            </p>
+
+                            <br/>
+
+                            <p>Happy Note Taking! 📝</p>
+
+                            <p>
+                                Regards,<br/>
+                                <strong>Fundoo Notes Team</strong>
+                            </p>
+                        </div>"
+                    });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
             }
 
             return _tokenService.GenerateToken(user);
