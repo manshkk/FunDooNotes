@@ -25,5 +25,7 @@ namespace ModelLayer.Entities
         public DateTime CreatedAt { get; set; }
 
         public DateTime ChangedAt { get; set; }
+
+        
     }
 }

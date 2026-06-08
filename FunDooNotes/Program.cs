@@ -107,17 +107,13 @@ namespace FunDooNotes
 
             // Dependency Injection
 
-            builder.Services.AddScoped<
-                IUserService,
-                UserService>();
+            builder.Services.AddScoped<IUserService, UserService>();
 
-            builder.Services.AddScoped<
-                IUserRepository,
-                UserRepository>();
+            builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-            builder.Services.AddScoped<
-                ITokenService,
-                TokenService>();
+            builder.Services.AddScoped<ITokenService, TokenService>();
+
+            builder.Services.AddScoped<IEmailService, EmailService>();
 
             var app = builder.Build();
 
