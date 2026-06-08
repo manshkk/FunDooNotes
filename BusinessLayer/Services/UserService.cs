@@ -1,4 +1,5 @@
-﻿using BusinessLayer.Interfaces;
+﻿using BCrypt.Net;
+using BusinessLayer.Interfaces;
 using ModelLayer.DTOs;
 using ModelLayer.Entities;
 using RepositoryLayer.Interfaces;
@@ -16,12 +17,24 @@ namespace BusinessLayer.Services
 
         public bool Register(RegisterDTO registerDTO)
         {
+            var existingUser =
+                _userRepository.GetUserByEmail(
+                    registerDTO.Email);
+
+            if (existingUser != null)
+            {
+                return false;
+            }
+
             User user = new User();
 
             user.FirstName = registerDTO.FirstName;
             user.LastName = registerDTO.LastName;
             user.Email = registerDTO.Email;
-            user.Password = registerDTO.Password;
+
+            user.Password =
+                BCrypt.Net.BCrypt.HashPassword(
+                    registerDTO.Password);
 
             user.CreatedAt = DateTime.UtcNow;
             user.ChangedAt = DateTime.UtcNow;

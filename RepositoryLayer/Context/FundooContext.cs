@@ -5,7 +5,8 @@ namespace RepositoryLayer.Context
 {
     public class FundooContext : DbContext
     {
-        public FundooContext(DbContextOptions<FundooContext> options)
+        public FundooContext(
+            DbContextOptions<FundooContext> options)
             : base(options)
         {
         }

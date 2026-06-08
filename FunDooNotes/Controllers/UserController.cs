@@ -18,14 +18,34 @@ namespace FunDooNotes.Controllers
         [HttpPost("register")]
         public IActionResult Register(RegisterDTO registerDTO)
         {
-            bool result = _userService.Register(registerDTO);
-
-            if (result)
+            try
             {
-                return Ok("User Registered Successfully");
-            }
+                bool result =
+                    _userService.Register(registerDTO);
 
-            return BadRequest("Registration Failed");
+                if (result)
+                {
+                    return Ok(new
+                    {
+                        Success = true,
+                        Message = "User Registered Successfully"
+                    });
+                }
+
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = "Email already exists"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
         }
     }
 }
