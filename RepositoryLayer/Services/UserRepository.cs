@@ -21,5 +21,10 @@ namespace RepositoryLayer.Services
 
             return true;
         }
+
+        public User GetUserByEmail(string email)
+        {
+            return _context.Users.FirstOrDefault(x => x.Email == email);
+        }
     }
 }
