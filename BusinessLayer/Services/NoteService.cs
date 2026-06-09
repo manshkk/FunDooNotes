@@ -99,5 +99,13 @@ namespace BusinessLayer.Services
             return await _noteRepository
                 .UnpinNoteAsync(noteId, userId);
         }
+        public async Task<bool> UpdateColorAsync(
+                int noteId,
+                int userId,
+                string color)
+        {
+            return await _noteRepository
+                .UpdateColorAsync(noteId, userId, color);
+        }
     }
 }

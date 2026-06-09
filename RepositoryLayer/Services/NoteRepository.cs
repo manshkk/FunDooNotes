@@ -228,5 +228,26 @@ namespace RepositoryLayer.Services
 
             return true;
         }
+        public async Task<bool> UpdateColorAsync(
+            int noteId,
+            int userId,
+            string color)
+        {
+            var note = await _context.Notes
+                .FirstOrDefaultAsync(n =>
+                    n.NoteId == noteId &&
+                    n.UserId == userId &&
+                    !n.IsTrashed);
+
+            if (note == null)
+                return false;
+
+            note.Color = color;
+            note.ModifiedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }
