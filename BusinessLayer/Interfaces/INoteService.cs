@@ -25,5 +25,13 @@ namespace BusinessLayer.Interfaces
         Task<bool> MoveToTrashAsync(
             int noteId,
             int userId);
+
+        Task<IEnumerable<Note>> GetTrashedNotesAsync(int userId);
+
+        Task<bool> RestoreNoteAsync(int noteId, int userId);
+
+        Task<bool> PermanentDeleteAsync(
+            int noteId,
+            int userId);
     }
 }
