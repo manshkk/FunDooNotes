@@ -94,5 +94,51 @@ namespace RepositoryLayer.Services
 
             return true;
         }
+        public async Task<IEnumerable<Note>> GetTrashedNotesAsync(int userId)
+        {
+            return await _context.Notes
+                .Where(n =>
+                    n.UserId == userId &&
+                    n.IsTrashed)
+                .ToListAsync();
+        }
+        public async Task<bool> RestoreNoteAsync(
+            int noteId,
+            int userId)
+        {
+            var note = await _context.Notes
+                .FirstOrDefaultAsync(n =>
+                    n.NoteId == noteId &&
+                    n.UserId == userId &&
+                    n.IsTrashed);
+
+            if (note == null)
+                return false;
+
+            note.IsTrashed = false;
+            note.ModifiedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        public async Task<bool> PermanentDeleteAsync(
+            int noteId,
+            int userId)
+        {
+            var note = await _context.Notes
+                .FirstOrDefaultAsync(n =>
+                    n.NoteId == noteId &&
+                    n.UserId == userId);
+
+            if (note == null)
+                return false;
+
+            _context.Notes.Remove(note);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

@@ -122,5 +122,71 @@ namespace FundooNotes.Controllers
                 Message = "Note moved to trash successfully"
             });
         }
+        [HttpGet("trash")]
+        public async Task<IActionResult> GetTrashedNotes()
+        {
+            int userId = Convert.ToInt32(
+                User.FindFirst("UserId")?.Value);
+
+            var notes = await _noteService
+                .GetTrashedNotesAsync(userId);
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Trashed notes retrieved successfully",
+                Data = notes
+            });
+        }
+        [HttpPatch("{noteId}/restore")]
+        public async Task<IActionResult> RestoreNote(
+            int noteId)
+        {
+            int userId = Convert.ToInt32(
+                User.FindFirst("UserId")?.Value);
+
+            var result = await _noteService
+                .RestoreNoteAsync(noteId, userId);
+
+            if (!result)
+            {
+                return NotFound(new
+                {
+                    Success = false,
+                    Message = "Note not found"
+                });
+            }
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Note restored successfully"
+            });
+        }
+        [HttpDelete("{noteId}/permanent")]
+        public async Task<IActionResult> PermanentDelete(
+               int noteId)
+        {
+            int userId = Convert.ToInt32(
+                User.FindFirst("UserId")?.Value);
+
+            var result = await _noteService
+                .PermanentDeleteAsync(noteId, userId);
+
+            if (!result)
+            {
+                return NotFound(new
+                {
+                    Success = false,
+                    Message = "Note not found"
+                });
+            }
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Note permanently deleted"
+            });
+        }
     }
 }

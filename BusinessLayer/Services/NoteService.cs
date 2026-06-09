@@ -47,5 +47,24 @@ namespace BusinessLayer.Services
             return await _noteRepository
                 .MoveToTrashAsync(noteId, userId);
         }
+        public async Task<IEnumerable<Note>> GetTrashedNotesAsync(int userId)
+        {
+            return await _noteRepository
+                .GetTrashedNotesAsync(userId);
+        }
+        public async Task<bool> RestoreNoteAsync(
+            int noteId,
+            int userId)
+        {
+            return await _noteRepository
+                .RestoreNoteAsync(noteId, userId);
+        }
+        public async Task<bool> PermanentDeleteAsync(
+            int noteId,
+            int userId)
+        {
+            return await _noteRepository
+                .PermanentDeleteAsync(noteId, userId);
+        }
     }
 }
