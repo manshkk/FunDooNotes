@@ -120,6 +120,10 @@ namespace FunDooNotes
 
             builder.Services.AddScoped<INoteService, NoteService>();
 
+            builder.Services.AddScoped<ILabelRepository, LabelRepository>();
+
+            builder.Services.AddScoped< ILabelService,LabelService>();
+
             var app = builder.Build();
 
             // Swagger
