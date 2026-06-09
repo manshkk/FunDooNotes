@@ -140,5 +140,54 @@ namespace RepositoryLayer.Services
 
             return true;
         }
+        public async Task<IEnumerable<Note>> GetArchivedNotesAsync(int userId)
+        {
+            return await _context.Notes
+                .Where(n =>
+                    n.UserId == userId &&
+                    n.IsArchived &&
+                    !n.IsTrashed)
+                .ToListAsync();
+        }
+        public async Task<bool> ArchiveNoteAsync(
+            int noteId,
+            int userId)
+        {
+            var note = await _context.Notes
+                .FirstOrDefaultAsync(n =>
+                    n.NoteId == noteId &&
+                    n.UserId == userId &&
+                    !n.IsTrashed);
+
+            if (note == null)
+                return false;
+
+            note.IsArchived = true;
+            note.ModifiedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        public async Task<bool> UnarchiveNoteAsync(
+            int noteId,
+            int userId)
+        {
+            var note = await _context.Notes
+                .FirstOrDefaultAsync(n =>
+                    n.NoteId == noteId &&
+                    n.UserId == userId &&
+                    n.IsArchived);
+
+            if (note == null)
+                return false;
+
+            note.IsArchived = false;
+            note.ModifiedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }

@@ -188,5 +188,69 @@ namespace FundooNotes.Controllers
                 Message = "Note permanently deleted"
             });
         }
+        [HttpGet("archive")]
+        public async Task<IActionResult> GetArchivedNotes()
+        {
+            int userId = Convert.ToInt32(
+                User.FindFirst("UserId")?.Value);
+
+            var result = await _noteService
+                .GetArchivedNotesAsync(userId);
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Archived notes retrieved successfully",
+                Data = result
+            });
+        }
+        [HttpPatch("{noteId}/archive")]
+        public async Task<IActionResult> ArchiveNote(int noteId)
+        {
+            int userId = Convert.ToInt32(
+                User.FindFirst("UserId")?.Value);
+
+            var result = await _noteService
+                .ArchiveNoteAsync(noteId, userId);
+
+            if (!result)
+            {
+                return NotFound(new
+                {
+                    Success = false,
+                    Message = "Note not found"
+                });
+            }
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Note archived successfully"
+            });
+        }
+        [HttpPatch("{noteId}/unarchive")]
+        public async Task<IActionResult> UnarchiveNote(int noteId)
+        {
+            int userId = Convert.ToInt32(
+                User.FindFirst("UserId")?.Value);
+
+            var result = await _noteService
+                .UnarchiveNoteAsync(noteId, userId);
+
+            if (!result)
+            {
+                return NotFound(new
+                {
+                    Success = false,
+                    Message = "Note not found"
+                });
+            }
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Note unarchived successfully"
+            });
+        }
     }
 }

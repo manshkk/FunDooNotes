@@ -28,5 +28,11 @@ namespace RepositoryLayer.Interfaces
         Task<bool> PermanentDeleteAsync(
             int noteId,
             int userId);
+
+        Task<IEnumerable<Note>> GetArchivedNotesAsync(int userId);
+
+        Task<bool> ArchiveNoteAsync(int noteId, int userId);
+
+        Task<bool> UnarchiveNoteAsync(int noteId, int userId);
     }
 }
