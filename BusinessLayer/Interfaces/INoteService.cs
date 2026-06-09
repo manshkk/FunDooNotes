@@ -43,5 +43,10 @@ namespace BusinessLayer.Interfaces
         Task<bool> PinNoteAsync(int noteId, int userId);
 
         Task<bool> UnpinNoteAsync(int noteId, int userId);
+
+        Task<bool> UpdateColorAsync(
+                int noteId,
+                int userId,
+                string color);
     }
 }

@@ -300,5 +300,34 @@ namespace FundooNotes.Controllers
                 Message = "Note unpinned successfully"
             });
         }
+        [HttpPatch("{noteId}/color")]
+        public async Task<IActionResult> UpdateColor(
+                int noteId,
+                UpdateColorDto dto)
+        {
+            int userId = Convert.ToInt32(
+                User.FindFirst("UserId")?.Value);
+
+            var result = await _noteService
+                .UpdateColorAsync(
+                    noteId,
+                    userId,
+                    dto.Color);
+
+            if (!result)
+            {
+                return NotFound(new
+                {
+                    Success = false,
+                    Message = "Note not found"
+                });
+            }
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Color updated successfully"
+            });
+        }
     }
 }
