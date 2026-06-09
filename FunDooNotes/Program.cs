@@ -9,6 +9,7 @@ using RepositoryLayer.Interfaces;
 using RepositoryLayer.Services;
 using System.Text;
 
+
 namespace FunDooNotes
 {
     public class Program
@@ -114,6 +115,10 @@ namespace FunDooNotes
             builder.Services.AddScoped<ITokenService, TokenService>();
 
             builder.Services.AddScoped<IEmailService, EmailService>();
+
+            builder.Services.AddScoped<INoteRepository, NoteRepository>();
+
+            builder.Services.AddScoped<INoteService, NoteService>();
 
             var app = builder.Build();
 
