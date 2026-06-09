@@ -26,6 +26,6 @@ namespace ModelLayer.Entities
 
         public DateTime ChangedAt { get; set; }
 
-        
+        public ICollection<Note> Notes { get; set; }
     }
 }

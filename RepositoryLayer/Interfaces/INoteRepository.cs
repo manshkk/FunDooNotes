@@ -1,0 +1,24 @@
+﻿using ModelLayer.DTOs;
+using ModelLayer.DTOs.NoteDTOs;
+using ModelLayer.Entities;
+
+namespace RepositoryLayer.Interfaces
+{
+    public interface INoteRepository
+    {
+        Task<Note> CreateNoteAsync(int userId, CreateNoteDto dto);
+
+        Task<IEnumerable<Note>> GetAllNotesAsync(int userId);
+
+        Task<Note?> GetNoteByIdAsync(int noteId, int userId);
+
+        Task<Note?> UpdateNoteAsync(
+            int noteId,
+            int userId,
+            UpdateNoteDto dto);
+
+        Task<bool> MoveToTrashAsync(
+            int noteId,
+            int userId);
+    }
+}
