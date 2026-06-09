@@ -27,5 +27,7 @@ namespace ModelLayer.Entities
         public DateTime ChangedAt { get; set; }
 
         public ICollection<Note> Notes { get; set; }
+
+        public ICollection<Label> Labels { get; set; } = new List<Label>();
     }
 }
