@@ -34,5 +34,9 @@ namespace RepositoryLayer.Interfaces
         Task<bool> ArchiveNoteAsync(int noteId, int userId);
 
         Task<bool> UnarchiveNoteAsync(int noteId, int userId);
+
+        Task<bool> PinNoteAsync(int noteId, int userId);
+
+        Task<bool> UnpinNoteAsync(int noteId, int userId);
     }
 }

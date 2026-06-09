@@ -252,5 +252,53 @@ namespace FundooNotes.Controllers
                 Message = "Note unarchived successfully"
             });
         }
+        [HttpPatch("{noteId}/pin")]
+        public async Task<IActionResult> PinNote(int noteId)
+        {
+            int userId = Convert.ToInt32(
+                User.FindFirst("UserId")?.Value);
+
+            var result = await _noteService
+                .PinNoteAsync(noteId, userId);
+
+            if (!result)
+            {
+                return NotFound(new
+                {
+                    Success = false,
+                    Message = "Note not found"
+                });
+            }
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Note pinned successfully"
+            });
+        }
+        [HttpPatch("{noteId}/unpin")]
+        public async Task<IActionResult> UnpinNote(int noteId)
+        {
+            int userId = Convert.ToInt32(
+                User.FindFirst("UserId")?.Value);
+
+            var result = await _noteService
+                .UnpinNoteAsync(noteId, userId);
+
+            if (!result)
+            {
+                return NotFound(new
+                {
+                    Success = false,
+                    Message = "Note not found"
+                });
+            }
+
+            return Ok(new
+            {
+                Success = true,
+                Message = "Note unpinned successfully"
+            });
+        }
     }
 }
