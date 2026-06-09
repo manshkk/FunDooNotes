@@ -66,5 +66,24 @@ namespace BusinessLayer.Services
             return await _noteRepository
                 .PermanentDeleteAsync(noteId, userId);
         }
+        public async Task<IEnumerable<Note>> GetArchivedNotesAsync(int userId)
+        {
+            return await _noteRepository
+                .GetArchivedNotesAsync(userId);
+        }
+        public async Task<bool> ArchiveNoteAsync(
+            int noteId,
+            int userId)
+        {
+            return await _noteRepository
+                .ArchiveNoteAsync(noteId, userId);
+        }
+        public async Task<bool> UnarchiveNoteAsync(
+            int noteId,
+            int userId)
+        {
+            return await _noteRepository
+                .UnarchiveNoteAsync(noteId, userId);
+        }
     }
 }
