@@ -85,5 +85,19 @@ namespace BusinessLayer.Services
             return await _noteRepository
                 .UnarchiveNoteAsync(noteId, userId);
         }
+        public async Task<bool> PinNoteAsync(
+            int noteId,
+            int userId)
+        {
+            return await _noteRepository
+                .PinNoteAsync(noteId, userId);
+        }
+        public async Task<bool> UnpinNoteAsync(
+            int noteId,
+            int userId)
+        {
+            return await _noteRepository
+                .UnpinNoteAsync(noteId, userId);
+        }
     }
 }

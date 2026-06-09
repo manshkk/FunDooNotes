@@ -189,5 +189,44 @@ namespace RepositoryLayer.Services
 
             return true;
         }
+        public async Task<bool> PinNoteAsync(
+            int noteId,
+            int userId)
+        {
+            var note = await _context.Notes
+                .FirstOrDefaultAsync(n =>
+                    n.NoteId == noteId &&
+                    n.UserId == userId &&
+                    !n.IsTrashed);
+
+            if (note == null)
+                return false;
+
+            note.IsPinned = true;
+            note.ModifiedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+        public async Task<bool> UnpinNoteAsync(
+            int noteId,
+            int userId)
+        {
+            var note = await _context.Notes
+                .FirstOrDefaultAsync(n =>
+                    n.NoteId == noteId &&
+                    n.UserId == userId);
+
+            if (note == null)
+                return false;
+
+            note.IsPinned = false;
+            note.ModifiedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
     }
 }
