@@ -41,7 +41,13 @@ namespace RepositoryLayer.Context
                 .WithMany(l => l.NoteLabels)
                 .HasForeignKey(nl => nl.LabelId)
                 .OnDelete(DeleteBehavior.NoAction);
+            modelBuilder.Entity<Collaborator>()
+                .HasOne(c => c.CollaboratorUser)
+                .WithMany()
+                .HasForeignKey(c => c.CollaboratorUserId)
+                .OnDelete(DeleteBehavior.NoAction);
         }
-    
+        public DbSet<Collaborator> Collaborators { get; set; }
+
     }
 }

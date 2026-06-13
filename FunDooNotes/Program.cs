@@ -6,6 +6,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RepositoryLayer.Context;
 using RepositoryLayer.Interfaces;
+using RepositoryLayer.Repositories;
 using RepositoryLayer.Services;
 using System.Text;
 
@@ -123,6 +124,10 @@ namespace FunDooNotes
             builder.Services.AddScoped<ILabelRepository, LabelRepository>();
 
             builder.Services.AddScoped< ILabelService,LabelService>();
+
+            builder.Services.AddScoped<ICollaboratorRepository, CollaboratorRepository>();
+
+            builder.Services.AddScoped< ICollaboratorService, CollaboratorService>();
 
             var app = builder.Build();
 
