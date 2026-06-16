@@ -1,3 +1,4 @@
+using FunDooNotes.RabbitMQ;
 using StackExchange.Redis;
 using BusinessLayer.Interfaces;
 using BusinessLayer.Services;
@@ -122,6 +123,8 @@ namespace FunDooNotes
             builder.Services.AddScoped<ICacheService, CacheService>();
 
             builder.Services.AddSingleton<IRabbitMQPublisher, RabbitMQPublisher>();
+
+            builder.Services.AddHostedService<EmailConsumerService>();
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 

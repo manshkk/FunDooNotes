@@ -1,6 +1,7 @@
-﻿using BCrypt.Net;
-using BusinessLayer.Interfaces;
+﻿using System.Text.Json;
 using ModelLayer.DTOs;
+using BCrypt.Net;
+using BusinessLayer.Interfaces;
 using ModelLayer.Entities;
 using RepositoryLayer.Interfaces;
 
@@ -14,11 +15,18 @@ namespace BusinessLayer.Services
 
         private readonly IEmailService _emailService;
 
-        public UserService(IUserRepository userRepository,ITokenService tokenService, IEmailService emailService)
+        private readonly IRabbitMQPublisher _rabbitMQPublisher;
+
+        public UserService(
+            IUserRepository userRepository,
+            ITokenService tokenService,
+            IEmailService emailService,
+            IRabbitMQPublisher rabbitMQPublisher)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
             _emailService = emailService;
+            _rabbitMQPublisher = rabbitMQPublisher;
         }
 
         public bool Register(RegisterDTO registerDTO)
@@ -45,7 +53,25 @@ namespace BusinessLayer.Services
             user.CreatedAt = DateTime.UtcNow;
             user.ChangedAt = DateTime.UtcNow;
 
-            return _userRepository.Register(user);
+            bool result = _userRepository.Register(user);
+
+            if (result)
+            {
+                var emailMessage = new EmailMessageDTO
+                {
+                    Email = user.Email,
+                    FirstName = user.FirstName
+                };
+
+                string message =
+                    JsonSerializer.Serialize(emailMessage);
+
+                _rabbitMQPublisher.Publish(
+                    "fundoo.email.queue",
+                    message);
+            }
+
+            return result;
         }
         public string Login(LoginDTO loginDTO)
         {
