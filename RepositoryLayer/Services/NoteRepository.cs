@@ -11,9 +11,14 @@ namespace RepositoryLayer.Services
     {
         private readonly FundooContext _context;
 
-        public NoteRepository(FundooContext context)
+        private readonly ICacheService _cacheService;
+
+        public NoteRepository(
+            FundooContext context,
+            ICacheService cacheService)
         {
             _context = context;
+            _cacheService = cacheService;
         }
 
         public async Task<Note> CreateNoteAsync(int userId, CreateNoteDto dto)
@@ -33,23 +38,72 @@ namespace RepositoryLayer.Services
             _context.Notes.Add(note);
             await _context.SaveChangesAsync();
 
+            _cacheService.RemoveData($"notes:user:{userId}");
+
             return note;
         }
 
         public async Task<IEnumerable<Note>> GetAllNotesAsync(int userId)
         {
-            return await _context.Notes
-                .Where(n => n.UserId == userId && !n.IsTrashed)
+            string cacheKey = $"notes:user:{userId}";
+
+            var cachedNotes =
+                _cacheService.GetData<List<Note>>(cacheKey);
+
+            if (cachedNotes != null)
+            {
+                Console.WriteLine("Cache Hit");
+
+                return cachedNotes;
+            }
+
+            Console.WriteLine("Cache Miss");
+
+            var notes = await _context.Notes
+                .Where(n =>
+                    n.UserId == userId &&
+                    !n.IsTrashed)
                 .ToListAsync();
+
+            _cacheService.SetData(
+                cacheKey,
+                notes,
+                DateTimeOffset.Now.AddMinutes(10));
+
+            return notes;
         }
 
         public async Task<Note?> GetNoteByIdAsync(int noteId, int userId)
         {
-            return await _context.Notes
+            string cacheKey = $"note:{noteId}";
+
+            var cachedNote =
+                _cacheService.GetData<Note>(cacheKey);
+
+            if (cachedNote != null)
+            {
+                Console.WriteLine("Note Cache Hit");
+
+                return cachedNote;
+            }
+
+            Console.WriteLine("Note Cache Miss");
+
+            var note = await _context.Notes
                 .FirstOrDefaultAsync(n =>
                     n.NoteId == noteId &&
                     n.UserId == userId &&
                     !n.IsTrashed);
+
+            if (note != null)
+            {
+                _cacheService.SetData(
+                    cacheKey,
+                    note,
+                    DateTimeOffset.Now.AddMinutes(10));
+            }
+
+            return note;
         }
 
         public async Task<Note?> UpdateNoteAsync(
@@ -71,6 +125,7 @@ namespace RepositoryLayer.Services
             note.ModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData($"notes:user:{userId}");
 
             return note;
         }
@@ -91,6 +146,8 @@ namespace RepositoryLayer.Services
             note.ModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData(
+            $"notes:user:{userId}");
 
             return true;
         }
@@ -119,6 +176,8 @@ namespace RepositoryLayer.Services
             note.ModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData(
+            $"notes:user:{userId}");
 
             return true;
         }
@@ -137,6 +196,8 @@ namespace RepositoryLayer.Services
             _context.Notes.Remove(note);
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData(
+            $"notes:user:{userId}");
 
             return true;
         }
@@ -166,6 +227,8 @@ namespace RepositoryLayer.Services
             note.ModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData(
+             $"notes:user:{userId}");
 
             return true;
         }
@@ -186,6 +249,8 @@ namespace RepositoryLayer.Services
             note.ModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData(
+             $"notes:user:{userId}");
 
             return true;
         }
@@ -206,6 +271,8 @@ namespace RepositoryLayer.Services
             note.ModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData(
+             $"notes:user:{userId}");
 
             return true;
         }
@@ -225,6 +292,8 @@ namespace RepositoryLayer.Services
             note.ModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData(
+             $"notes:user:{userId}");
 
             return true;
         }
@@ -246,8 +315,12 @@ namespace RepositoryLayer.Services
             note.ModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData(
+             $"notes:user:{userId}");
 
             return true;
         }
     }
 }
+
+  

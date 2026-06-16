@@ -1,3 +1,4 @@
+using StackExchange.Redis;
 using BusinessLayer.Interfaces;
 using BusinessLayer.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -106,10 +107,19 @@ namespace FunDooNotes
                         builder.Configuration.GetConnectionString(
                             "DefaultConnection"));
                 });
+            builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+            {
+                var configuration =
+                    builder.Configuration["RedisURL"];
+
+                return ConnectionMultiplexer.Connect(configuration);
+            });
 
             // Dependency Injection
 
             builder.Services.AddScoped<IUserService, UserService>();
+
+            builder.Services.AddScoped<ICacheService, CacheService>();
 
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
