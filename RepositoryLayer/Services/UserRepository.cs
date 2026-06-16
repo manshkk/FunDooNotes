@@ -26,5 +26,27 @@ namespace RepositoryLayer.Services
         {
             return _context.Users.FirstOrDefault(x => x.Email == email);
         }
+
+        public bool UpdatePassword(
+            string email,
+            string newPassword)
+        {
+            var user =
+                _context.Users
+                .FirstOrDefault(x => x.Email == email);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            user.Password = newPassword;
+
+            user.ChangedAt = DateTime.UtcNow;
+
+            _context.SaveChanges();
+
+            return true;
+        }
     }
 }
