@@ -291,8 +291,12 @@ namespace RepositoryLayer.Services
             note.ModifiedAt = DateTime.UtcNow;
 
             await _context.SaveChangesAsync();
+            _cacheService.RemoveData(
+             $"notes:user:{userId}");
 
             return true;
         }
     }
 }
+
+  
