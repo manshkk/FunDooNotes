@@ -122,5 +122,37 @@ namespace FunDooNotes.Controllers
                 Message = "Emails Sent Successfully"
             });
         }
+        [HttpPost("forgot-password")]
+        public IActionResult ForgotPassword(ForgotPasswordDTO dto)
+        {
+            try
+            {
+                bool result =
+                    _userService.ForgotPassword(dto);
+
+                if (!result)
+                {
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        Message = "Email not found"
+                    });
+                }
+
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Password reset email sent"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
     }
 }

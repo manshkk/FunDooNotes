@@ -1,4 +1,8 @@
-﻿using System.Text.Json;
+﻿using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
+using System.Text.Json;
 using ModelLayer.DTOs;
 using BCrypt.Net;
 using BusinessLayer.Interfaces;
@@ -143,6 +147,77 @@ namespace BusinessLayer.Services
             }
 
             return _tokenService.GenerateToken(user);
+        }
+
+        public bool ForgotPassword(ForgotPasswordDTO dto)
+        {
+            var user =
+                _userRepository.GetUserByEmail(
+                    dto.Email);
+
+            if (user == null)
+            {
+                return false;
+            }
+
+            var tokenHandler =
+                new JwtSecurityTokenHandler();
+
+            var key =
+                Encoding.UTF8.GetBytes(
+                    "FundooNotesProjectJWTAuthenticationSecretKey2026");
+
+            var tokenDescriptor =
+                new SecurityTokenDescriptor
+                {
+                    Subject =
+                        new ClaimsIdentity(
+                        new[]
+                        {
+                    new Claim(
+                        ClaimTypes.Email,
+                        user.Email)
+                        }),
+
+                    Expires =
+                        DateTime.UtcNow.AddMinutes(30),
+
+                    SigningCredentials =
+                        new SigningCredentials(
+                            new SymmetricSecurityKey(key),
+                            SecurityAlgorithms.HmacSha256Signature)
+                };
+
+            var token =
+                tokenHandler.CreateToken(
+                    tokenDescriptor);
+
+            string resetToken =
+                tokenHandler.WriteToken(token);
+
+            var forgotPasswordMessage =
+                new ForgotPasswordMessageDTO
+                {
+                    Email = user.Email,
+                    ResetToken = resetToken
+                };
+
+            string message =
+                JsonSerializer.Serialize(
+                    forgotPasswordMessage);
+
+            _rabbitMQPublisher.Publish(
+                "fundoo.forgotpassword.queue",
+                message);
+
+            return true;
+        }
+
+        public bool ResetPassword(
+            string email,
+            ResetPasswordDTO dto)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,5 +6,11 @@ namespace BusinessLayer.Interfaces
     {
         bool Register(RegisterDTO registerDTO);
         string Login(LoginDTO loginDTO);
+
+        bool ForgotPassword(ForgotPasswordDTO dto);
+
+        bool ResetPassword(
+            string email,
+            ResetPasswordDTO dto);
     }
 }

@@ -128,6 +128,8 @@ namespace FunDooNotes
 
             builder.Services.AddHostedService<NoteConsumerService>();
 
+            builder.Services.AddHostedService<ForgotPasswordConsumerService>();
+
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             builder.Services.AddScoped<ITokenService, TokenService>();

@@ -7,5 +7,9 @@ namespace RepositoryLayer.Interfaces
         bool Register(User user);
 
         User GetUserByEmail(string email);
+
+        bool UpdatePassword(
+            string email,
+            string newPassword);
     }
 }
