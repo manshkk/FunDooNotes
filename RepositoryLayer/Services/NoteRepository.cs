@@ -75,11 +75,35 @@ namespace RepositoryLayer.Services
 
         public async Task<Note?> GetNoteByIdAsync(int noteId, int userId)
         {
-            return await _context.Notes
+            string cacheKey = $"note:{noteId}";
+
+            var cachedNote =
+                _cacheService.GetData<Note>(cacheKey);
+
+            if (cachedNote != null)
+            {
+                Console.WriteLine("Note Cache Hit");
+
+                return cachedNote;
+            }
+
+            Console.WriteLine("Note Cache Miss");
+
+            var note = await _context.Notes
                 .FirstOrDefaultAsync(n =>
                     n.NoteId == noteId &&
                     n.UserId == userId &&
                     !n.IsTrashed);
+
+            if (note != null)
+            {
+                _cacheService.SetData(
+                    cacheKey,
+                    note,
+                    DateTimeOffset.Now.AddMinutes(10));
+            }
+
+            return note;
         }
 
         public async Task<Note?> UpdateNoteAsync(
