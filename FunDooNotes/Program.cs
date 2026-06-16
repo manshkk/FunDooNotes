@@ -121,6 +121,8 @@ namespace FunDooNotes
 
             builder.Services.AddScoped<ICacheService, CacheService>();
 
+            builder.Services.AddSingleton<IRabbitMQPublisher, RabbitMQPublisher>();
+
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             builder.Services.AddScoped<ITokenService, TokenService>();
