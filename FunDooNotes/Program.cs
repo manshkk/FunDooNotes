@@ -126,6 +126,8 @@ namespace FunDooNotes
 
             builder.Services.AddHostedService<EmailConsumerService>();
 
+            builder.Services.AddHostedService<NoteConsumerService>();
+
             builder.Services.AddScoped<IUserRepository, UserRepository>();
 
             builder.Services.AddScoped<ITokenService, TokenService>();

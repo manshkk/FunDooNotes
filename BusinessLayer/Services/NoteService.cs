@@ -1,4 +1,5 @@
-﻿using BusinessLayer.Interfaces;
+﻿using System.Text.Json;
+using BusinessLayer.Interfaces;
 using ModelLayer.DTOs;
 using ModelLayer.DTOs.NoteDTOs;
 using ModelLayer.Entities;
@@ -10,14 +11,43 @@ namespace BusinessLayer.Services
     {
         private readonly INoteRepository _noteRepository;
 
-        public NoteService(INoteRepository noteRepository)
+        private readonly IRabbitMQPublisher _rabbitMQPublisher;
+
+        public NoteService(
+        INoteRepository noteRepository,
+        IRabbitMQPublisher rabbitMQPublisher)
         {
             _noteRepository = noteRepository;
+            _rabbitMQPublisher = rabbitMQPublisher;
         }
 
-        public async Task<Note> CreateNoteAsync(int userId, CreateNoteDto dto)
+        public async Task<Note> CreateNoteAsync(
+            int userId,
+            CreateNoteDto dto)
         {
-            return await _noteRepository.CreateNoteAsync(userId, dto);
+            var note =
+                await _noteRepository.CreateNoteAsync(
+                    userId,
+                    dto);
+
+            var eventData =
+                new NoteCreatedEventDTO
+                {
+                    EventName = "note.created",
+                    NoteId = note.NoteId,
+                    UserId = note.UserId,
+                    Title = note.Title,
+                    OccurredOn = DateTime.UtcNow
+                };
+
+            string message =
+                JsonSerializer.Serialize(eventData);
+
+            _rabbitMQPublisher.Publish(
+                "fundoo.note.queue",
+                message);
+
+            return note;
         }
 
         public async Task<IEnumerable<Note>> GetAllNotesAsync(int userId)
