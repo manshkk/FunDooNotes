@@ -154,5 +154,39 @@ namespace FunDooNotes.Controllers
                 });
             }
         }
+        [HttpPost("reset-password")]
+        public IActionResult ResetPassword(
+            string token,
+            ResetPasswordDTO dto)
+        {
+            try
+            {
+                bool result =
+                    _userService.ResetPassword(token, dto);
+
+                if (!result)
+                {
+                    return BadRequest(new
+                    {
+                        Success = false,
+                        Message = "Password reset failed"
+                    });
+                }
+
+                return Ok(new
+                {
+                    Success = true,
+                    Message = "Password reset successfully"
+                });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new
+                {
+                    Success = false,
+                    Message = ex.Message
+                });
+            }
+        }
     }
 }

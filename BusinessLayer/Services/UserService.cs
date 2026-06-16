@@ -1,13 +1,14 @@
-﻿using Microsoft.IdentityModel.Tokens;
+﻿using BCrypt.Net;
+using BusinessLayer.Interfaces;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+using ModelLayer.DTOs;
+using ModelLayer.Entities;
+using RepositoryLayer.Interfaces;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
-using ModelLayer.DTOs;
-using BCrypt.Net;
-using BusinessLayer.Interfaces;
-using ModelLayer.Entities;
-using RepositoryLayer.Interfaces;
 
 namespace BusinessLayer.Services
 {
@@ -21,16 +22,20 @@ namespace BusinessLayer.Services
 
         private readonly IRabbitMQPublisher _rabbitMQPublisher;
 
+        private readonly IConfiguration _configuration;
+
         public UserService(
             IUserRepository userRepository,
             ITokenService tokenService,
             IEmailService emailService,
-            IRabbitMQPublisher rabbitMQPublisher)
+            IRabbitMQPublisher rabbitMQPublisher,
+            IConfiguration configuration)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
             _emailService = emailService;
             _rabbitMQPublisher = rabbitMQPublisher;
+            _configuration = configuration;
         }
 
         public bool Register(RegisterDTO registerDTO)
@@ -214,10 +219,59 @@ namespace BusinessLayer.Services
         }
 
         public bool ResetPassword(
-            string email,
+            string token,
             ResetPasswordDTO dto)
         {
-            throw new NotImplementedException();
+            if (dto.NewPassword != dto.ConfirmPassword)
+            {
+                return false;
+            }
+
+            var tokenHandler =
+                new JwtSecurityTokenHandler();
+
+            var key =
+                Encoding.UTF8.GetBytes(
+                    _configuration["Jwt:Key"]);
+
+            try
+            {
+                var principal =
+                    tokenHandler.ValidateToken(
+                        token,
+                        new TokenValidationParameters
+                        {
+                            ValidateIssuerSigningKey = true,
+                            IssuerSigningKey =
+                                new SymmetricSecurityKey(key),
+
+                            ValidateIssuer = false,
+                            ValidateAudience = false,
+                            ClockSkew = TimeSpan.Zero
+                        },
+                        out SecurityToken validatedToken);
+
+                string email =
+                    principal.FindFirst(
+                        ClaimTypes.Email)?.Value;
+
+                if (string.IsNullOrEmpty(email))
+                {
+                    return false;
+                }
+
+                string hashedPassword =
+                    BCrypt.Net.BCrypt.HashPassword(
+                        dto.NewPassword);
+
+                return _userRepository.UpdatePassword(
+                    email,
+                    hashedPassword);
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

@@ -10,7 +10,7 @@ namespace BusinessLayer.Interfaces
         bool ForgotPassword(ForgotPasswordDTO dto);
 
         bool ResetPassword(
-            string email,
+            string token,
             ResetPasswordDTO dto);
     }
 }
