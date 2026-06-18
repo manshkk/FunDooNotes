@@ -1,6 +1,4 @@
 ﻿using BusinessLayer.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using ModelLayer.DTOs;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
