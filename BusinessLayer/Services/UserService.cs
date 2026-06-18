@@ -9,6 +9,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 
 namespace BusinessLayer.Services
 {
@@ -24,28 +25,39 @@ namespace BusinessLayer.Services
 
         private readonly IConfiguration _configuration;
 
+        private readonly ILogger<UserService> _logger;
+
         public UserService(
             IUserRepository userRepository,
             ITokenService tokenService,
             IEmailService emailService,
             IRabbitMQPublisher rabbitMQPublisher,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            ILogger<UserService> logger)
         {
             _userRepository = userRepository;
             _tokenService = tokenService;
             _emailService = emailService;
             _rabbitMQPublisher = rabbitMQPublisher;
             _configuration = configuration;
+            _logger = logger;
         }
 
         public bool Register(RegisterDTO registerDTO)
         {
+            _logger.LogInformation(
+            "Registration attempt for Email {Email}",
+            registerDTO.Email);
             var existingUser =
                 _userRepository.GetUserByEmail(
                     registerDTO.Email);
 
             if (existingUser != null)
             {
+                _logger.LogWarning(
+                    "Registration failed. Email {Email} already exists",
+                    registerDTO.Email);
+
                 return false;
             }
 
@@ -78,18 +90,30 @@ namespace BusinessLayer.Services
                 _rabbitMQPublisher.Publish(
                     "fundoo.email.queue",
                     message);
+
+                _logger.LogInformation(
+                    "Welcome email message published to RabbitMQ for Email {Email}",
+                    user.Email);
             }
 
             return result;
         }
         public string Login(LoginDTO loginDTO)
         {
+
+            _logger.LogInformation(
+                "Login attempt for Email {Email}",
+                loginDTO.Email);
             var user =
                 _userRepository.GetUserByEmail(
                     loginDTO.Email);
 
             if (user == null)
             {
+                _logger.LogWarning(
+                    "Login failed. User not found for Email {Email}",
+                    loginDTO.Email);
+
                 return null;
             }
 
@@ -100,11 +124,19 @@ namespace BusinessLayer.Services
 
             if (!passwordMatch)
             {
+                _logger.LogWarning(
+                    "Login failed. Invalid password for Email {Email}",
+                    loginDTO.Email);
+
                 return null;
             }
 
             try
             {
+                _logger.LogInformation(
+                    "Login notification email sent successfully to Email {Email}",
+                    user.Email);
+
                 _emailService.SendEmail(
                     new EmailDTO
                     {
@@ -148,8 +180,14 @@ namespace BusinessLayer.Services
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                _logger.LogError(
+                    ex,
+                    "Failed to send login notification email to Email {Email}",
+                    user.Email);
             }
+            _logger.LogInformation(
+                "User logged in successfully for Email {Email}",
+                user.Email);
 
             return _tokenService.GenerateToken(user);
         }

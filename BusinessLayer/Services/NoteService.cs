@@ -4,6 +4,8 @@ using ModelLayer.DTOs;
 using ModelLayer.DTOs.NoteDTOs;
 using ModelLayer.Entities;
 using RepositoryLayer.Interfaces;
+using Microsoft.Extensions.Logging;
+
 
 namespace BusinessLayer.Services
 {
@@ -13,12 +15,16 @@ namespace BusinessLayer.Services
 
         private readonly IRabbitMQPublisher _rabbitMQPublisher;
 
+        private readonly ILogger<NoteService> _logger;
+
         public NoteService(
-        INoteRepository noteRepository,
-        IRabbitMQPublisher rabbitMQPublisher)
+            INoteRepository noteRepository,
+            IRabbitMQPublisher rabbitMQPublisher,
+            ILogger<NoteService> logger)
         {
             _noteRepository = noteRepository;
             _rabbitMQPublisher = rabbitMQPublisher;
+            _logger = logger;
         }
 
         public async Task<Note> CreateNoteAsync(
@@ -52,7 +58,18 @@ namespace BusinessLayer.Services
 
         public async Task<IEnumerable<Note>> GetAllNotesAsync(int userId)
         {
-            return await _noteRepository.GetAllNotesAsync(userId);
+            _logger.LogInformation(
+                "Fetching notes for UserId {UserId}",
+                userId);
+
+            var notes =
+                await _noteRepository.GetAllNotesAsync(userId);
+
+            _logger.LogInformation(
+                "Retrieved notes successfully for UserId {UserId}",
+                userId);
+
+            return notes;
         }
 
         public async Task<Note?> GetNoteByIdAsync(int noteId, int userId)
@@ -130,7 +147,7 @@ namespace BusinessLayer.Services
                 .UnpinNoteAsync(noteId, userId);
         }
         public async Task<bool> UpdateColorAsync(
-                int noteId,
+                int noteId, 
                 int userId,
                 string color)
         {

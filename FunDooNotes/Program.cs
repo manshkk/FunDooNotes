@@ -1,7 +1,7 @@
-using FunDooNotes.RabbitMQ;
-using StackExchange.Redis;
 using BusinessLayer.Interfaces;
 using BusinessLayer.Services;
+using FunDooNotes.Configuration;
+using FunDooNotes.RabbitMQ;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -10,8 +10,9 @@ using RepositoryLayer.Context;
 using RepositoryLayer.Interfaces;
 using RepositoryLayer.Repositories;
 using RepositoryLayer.Services;
+using Serilog;
+using StackExchange.Redis;
 using System.Text;
-
 
 namespace FunDooNotes
 {
@@ -20,6 +21,7 @@ namespace FunDooNotes
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+            SerilogConfiguration.ConfigureSerilog(builder);
 
             // Add Controllers
             builder.Services.AddControllers();
@@ -155,6 +157,7 @@ namespace FunDooNotes
             app.UseSwaggerUI();
 
             app.UseHttpsRedirection();
+            app.UseSerilogRequestLogging();
 
             // Authentication First
             app.UseAuthentication();

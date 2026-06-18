@@ -1,3 +1,6 @@
 .vs/
 bin/
 obj/
+# Serilog Logs
+FunDooNotes/Logs/
+*.log
